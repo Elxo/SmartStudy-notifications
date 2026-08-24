@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: schedule-monitor
+  cancel-in-progress: false
+
 jobs:
   check-schedule:
     runs-on: ubuntu-latest
@@ -35,6 +39,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add monitor/schedule.sha256
           git diff --cached --quiet || git commit -m "Update schedule snapshot"
           git push
