@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartStudy — UML Diagrams</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
+  .wrap {
+    background: white; border: 1px solid #ccc; border-radius: 6px;
+    margin: 30px auto; max-width: 1200px; padding: 24px 32px 32px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); overflow-x: auto;
+  }
+  h2 { font-size: 14px; font-weight: bold; text-align: center; color: #1A3A6B;
+       margin: 0 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .cap { text-align: center; font-size: 12px; color: #555; margin: 0 0 18px; }
+  .mermaid { display: flex; justify-content: center; }
+  .note { background:#1A3A6B; color:white; border-radius:6px; padding:12px 18px;
+          max-width:1200px; margin:0 auto 24px; font-size:13px; line-height:1.6; }
+  .note strong { color:#C8A415; }
+</style>
+</head>
+<body>
+
+<div class="note">
+  <strong>Instructions:</strong> Wait for all three diagrams to render fully (5–10 seconds).
+  Then right-click each one → <em>Save image as</em> → save as PNG → insert into Word.
+  Use <strong>Ctrl+P → Save as PDF</strong> to get all three at once.
+</div>
+
+<!-- FIGURE 7 – FLOWCHART -->
+<div class="wrap">
+  <h2>Figure 7. Application Startup Flowchart</h2>
+  <p class="cap">(designed by the author)</p>
+  <div class="mermaid">
+flowchart TD
+    A([START]) --> B
+    B["Initialize JavaFX Application"] --> C
+    C["Connect to SQLite Database"] --> D
+    D["Initialize DB Schema"] --> E
+    E["Build CalendarView and load events"] --> F
+    F["Show Main Window"] --> G
+    G{"Settings\nconfigured?"}
+
+    G -->|Yes| L
+    G -->|No| H
+
+    H["Show GroupSetupDialog"] --> I
+    I["User enters university and group code"] --> J
+    J["Save settings to database"] --> K
+    K["Run ScheduleScraper — 26 weeks"] --> L
+
+    L["Load all events from database"] --> M
+    M["Render monthly calendar grid"] --> N
+    N["Wait for user interaction"]
+
+    N -->|Add or Delete Event| O["Update database and refresh grid"]
+    O --> N
+    N -->|Export ics| P["Write ICS file to disk"]
+    P --> N
+    N -->|Sync Google| Q["OAuth2 — push events to Google Calendar"]
+    Q --> N
+    N -->|Change Group| H
+    N -->|Close window| R([END])
+
+    style A fill:#1A3A6B,color:#fff,stroke:#1A3A6B
+    style R fill:#1A3A6B,color:#fff,stroke:#1A3A6B
+    style G fill:#C8A415,color:#000,stroke:#a07800
+    style B fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style C fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style D fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style E fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style F fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style H fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style I fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style J fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style K fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style L fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style M fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style N fill:#2A5A8F,color:#fff,stroke:#2A5A8F
+    style O fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style P fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+    style Q fill:#1E3A5F,color:#fff,stroke:#1E3A5F
+  </div>
+</div>
+
+<!-- FIGURE 8 – CLASS DIAGRAM -->
+<div class="wrap">
+  <h2>Figure 8. UML Class Diagram</h2>
+  <p class="cap">(designed by the author)</p>
+  <div class="mermaid">
+classDiagram
+    class Main {
+        -DatabaseManager db
+        +void start(Stage)
+        +void stop()
+    }
+
+    class Event {
+        -int id
+        -String title
+        -String courseCode
+        -String instructor
+        -String location
+        -LocalDateTime startTime
+        -LocalDateTime endTime
+        -String source
+        +int getId()
+        +String getTitle()
+        +String getSource()
+        +void setId(int)
+        +void setEndTime(LocalDateTime)
+    }
+
+    class DatabaseManager {
+        -Connection connection
+        +void connect()
+        +void initializeSchema()
+        +int saveEvent(Event)
+        +void deleteEvent(int)
+        +List getAllEvents()
+        +boolean eventExists(String, LocalDateTime)
+        +String getSetting(String)
+        +void setSetting(String, String)
+        +void deleteScrapedEvents()
+        +void logSync(int, String, String)
+    }
+
+    class ScheduleScraper {
+        -DatabaseManager db
+        -University university
+        -String groupCode
+        -Map LESSON_TIMES
+        +int scrapeAndSave()
+        -List parseWeek(Document)
+        -String extractDate(Element)
+        -int parseLessonNum(String)
+    }
+
+    class University {
+        <<interface>>
+        +String getName()
+        +String getCode()
+        +List fetchGroups()
+        +String buildScheduleUrl(String, int)
+    }
+
+    class TuribaUniversity {
+        -String BASE_URL
+        +String getName()
+        +String getCode()
+        +List fetchGroups()
+        +String buildScheduleUrl(String, int)
+    }
+
+    class UniversityRegistry {
+        -List SUPPORTED
+        +List getAll()
+        +University getByCode(String)
+    }
+
+    class CalendarView {
+        -DatabaseManager db
+        -YearMonth currentMonth
+        -LocalDate selectedDate
+        +void checkInitialSetup()
+        +void loadAndRefresh()
+        -void refreshGrid()
+        -void triggerScrape()
+        -void showAddEventDialog()
+        -void exportIcs()
+        -void syncGoogle()
+    }
+
+    class GroupSetupDialog {
+        -DatabaseManager db
+        -ComboBox universityCombo
+        -ComboBox groupCombo
+        -boolean save()
+    }
+
+    class GoogleCalendarSync {
+        -DatabaseManager db
+        +int pushEvents(List)
+        -Calendar buildService()
+    }
+
+    class IcsExporter {
+        +String export(List)
+        -String escapeText(String)
+    }
+
+    Main --> DatabaseManager : uses
+    Main --> CalendarView : creates
+    CalendarView --> DatabaseManager : reads and writes
+    CalendarView --> GoogleCalendarSync : triggers
+    CalendarView --> IcsExporter : triggers
+    CalendarView --> GroupSetupDialog : shows
+    CalendarView --> ScheduleScraper : creates
+    ScheduleScraper --> DatabaseManager : saves events
+    ScheduleScraper --> University : delegates URL building
+    TuribaUniversity ..|> University : implements
+    UniversityRegistry --> University : manages
+    DatabaseManager --> Event : persists
+    GoogleCalendarSync --> Event : converts and pushes
+    IcsExporter --> Event : serializes
+  </div>
+</div>
+
+<!-- FIGURE 9 – SEQUENCE DIAGRAM -->
+<div class="wrap">
+  <h2>Figure 9. UML Sequence Diagram — Schedule Scraping Flow</h2>
+  <p class="cap">(designed by the author)</p>
+  <div class="mermaid">
+sequenceDiagram
+    actor User
+    participant CV as CalendarView
+    participant GSD as GroupSetupDialog
+    participant DB as DatabaseManager
+    participant SS as ScheduleScraper
+    participant Web as University Website
+
+    User->>CV: Click Change Group
+    CV->>GSD: showAndWait
+    GSD-->>User: Display setup dialog
+    User->>GSD: Enter group code and click OK
+    GSD->>DB: setSetting university_code
+    GSD->>DB: setSetting group_code
+    GSD-->>CV: Return true
+
+    CV->>DB: deleteScrapedEvents
+    CV->>SS: Create ScheduleScraper with group code
+    CV->>SS: scrapeAndSave
+
+    loop For each week offset minus 13 to plus 13
+        SS->>Web: HTTP GET schedule page
+        Web-->>SS: Return HTML document
+        SS->>SS: parseWeek — extract date, lesson, title, room
+        SS->>SS: Merge consecutive lessons into one event
+
+        loop For each parsed event
+            SS->>DB: eventExists
+            DB-->>SS: Not a duplicate
+            SS->>DB: saveEvent
+            DB-->>SS: Return event ID
+        end
+    end
+
+    SS-->>CV: Return count of new events
+    CV->>DB: getAllEvents
+    DB-->>CV: Return list of Event objects
+    CV->>CV: refreshGrid
+    CV-->>User: Display updated calendar
+  </div>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor:          '#1E3A5F',
+      primaryTextColor:      '#ffffff',
+      primaryBorderColor:    '#1A3A6B',
+      lineColor:             '#1A3A6B',
+      secondaryColor:        '#EEF2FA',
+      tertiaryColor:         '#EEF2FA',
+      background:            '#ffffff',
+      actorBkg:              '#1E3A5F',
+      actorTextColor:        '#ffffff',
+      actorBorder:           '#1A3A6B',
+      activationBkgColor:    '#C8A415',
+      activationBorderColor: '#1A3A6B',
+      loopTextColor:         '#1A3A6B',
+      noteBkgColor:          '#FFF8E1',
+      noteTextColor:         '#333333',
+      classText:             '#1A3A6B'
+    },
+    flowchart:   { curve: 'basis', padding: 20 },
+    sequence:    { mirrorActors: false, showSequenceNumbers: true, width: 160 },
+    classDiagram:{ diagramPadding: 30 }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# ── Build output ──────────────────────────────────────────────────────────────
+target/
+
+# ── Sensitive files (never commit these) ──────────────────────────────────────
+# Google API OAuth credentials
+credentials.json
+
+# Google OAuth token (generated after first login)
+tokens/
+
+# ── Runtime-generated files ────────────────────────────────────────────────────
+# Local SQLite database (contains personal schedule data)
+calendar.db
+
+# ICS export file (generated on demand)
+university_schedule.ics
+
+# ── Generated launcher files ───────────────────────────────────────────────────
+# ICO can be regenerated from logo.png — see DEPENDENCIES.md
+SmartStudy.ico
+
+# ── Personal / local files ─────────────────────────────────────────────────────
+CoursePaper3_EmilsZvirbulis.docx
+
+# Word temp files
+~$*.docx
+~WRL*.tmp
+
+# ── IDE settings ───────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.iml
+
+# ── Claude Code settings ───────────────────────────────────────────────────────
+.claude/
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

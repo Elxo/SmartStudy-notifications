@@ -1,0 +1,40 @@
+name: Check Turiba schedule
+
+on:
+  schedule:
+    # Cover both Riga UTC+2 and UTC+3; the monitor filters to local 06:00/22:00.
+    - cron: "0 3,4 * * *"
+    - cron: "0 19,20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-schedule:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Scrape and notify
+        env:
+          TURIBA_GROUP_CODE: ${{ secrets.TURIBA_GROUP_CODE }}
+          NTFY_TOPIC_URL: ${{ secrets.NTFY_TOPIC_URL }}
+          SCHEDULE_STATE_FILE: monitor/schedule.sha256
+        run: mvn -q -DskipTests compile exec:java -Dexec.mainClass=com.calendar.monitor.ScheduleMonitor
+
+      - name: Save schedule snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add monitor/schedule.sha256
+          git diff --cached --quiet || git commit -m "Update schedule snapshot"
+          git push
