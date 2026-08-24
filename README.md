@@ -98,7 +98,7 @@ The application pushes all events to your primary Google Calendar. Each result i
 
 ### Automatic ntfy Notifications
 
-The repository includes a GitHub Actions workflow that checks the Turiba schedule twice daily and sends an ntfy notification when the schedule changes.
+The repository includes a GitHub Actions workflow that checks the Turiba schedule twice daily, at 05:50 and 21:50 Riga time, and sends an ntfy notification when the schedule changes.
 
 1. Install **ntfy** from the iPhone App Store.
 2. Create a long, private topic name and subscribe to it in the app.
@@ -107,7 +107,7 @@ The repository includes a GitHub Actions workflow that checks the Turiba schedul
     - `NTFY_TOPIC_URL` — `https://ntfy.sh/<your-private-topic>`
 4. Run **Actions → Check Turiba schedule → Run workflow** once to create the initial snapshot.
 
-The first run only stores a baseline. Later runs notify ntfy when an event is added, removed, or changed. The workflow accounts for Latvia's UTC+2/UTC+3 daylight-saving changes and only performs the scheduled check at 06:00 and 22:00 Riga time.
+The first run only stores a baseline. Later runs notify ntfy when an event is added, removed, or changed. The workflow accounts for Latvia's UTC+2/UTC+3 daylight-saving changes and performs the scheduled check 10 minutes before 06:00 and 22:00 Riga time.
 
 ---
 

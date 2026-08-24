@@ -27,9 +27,10 @@ public final class ScheduleMonitor {
 
     public static void main(String[] args) throws Exception {
         if ("schedule".equals(System.getenv("GITHUB_EVENT_NAME"))) {
-            int hour = ZonedDateTime.now(ZoneId.of("Europe/Riga")).getHour();
-            if (hour != 6 && hour != 22) {
-                System.out.println("Skipping UTC trigger outside 06:00/22:00 Europe/Riga.");
+            ZonedDateTime rigaTime = ZonedDateTime.now(ZoneId.of("Europe/Riga"));
+            int hour = rigaTime.getHour();
+            if (rigaTime.getMinute() != 50 || (hour != 5 && hour != 21)) {
+                System.out.println("Skipping UTC trigger outside 05:50/21:50 Europe/Riga.");
                 return;
             }
         }

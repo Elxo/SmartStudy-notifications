@@ -2,9 +2,9 @@ name: Check Turiba schedule
 
 on:
   schedule:
-    # Cover both Riga UTC+2 and UTC+3; the monitor filters to local 06:00/22:00.
-    - cron: "0 3,4 * * *"
-    - cron: "0 19,20 * * *"
+    # Cover both Riga UTC+2 and UTC+3; the monitor filters to local 05:50/21:50.
+    - cron: "50 3,4 * * *"
+    - cron: "50 19,20 * * *"
   workflow_dispatch:
 
 permissions:
