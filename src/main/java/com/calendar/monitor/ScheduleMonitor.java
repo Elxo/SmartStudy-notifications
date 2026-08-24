@@ -29,7 +29,7 @@ public final class ScheduleMonitor {
         if ("schedule".equals(System.getenv("GITHUB_EVENT_NAME"))) {
             ZonedDateTime rigaTime = ZonedDateTime.now(ZoneId.of("Europe/Riga"));
             int hour = rigaTime.getHour();
-            if (rigaTime.getMinute() != 50 || (hour != 5 && hour != 21)) {
+            if (rigaTime.getMinute() < 50 || (hour != 5 && hour != 21)) {
                 System.out.println("Skipping UTC trigger outside 05:50/21:50 Europe/Riga.");
                 return;
             }
