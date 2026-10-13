@@ -14,8 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
@@ -26,15 +24,6 @@ public final class ScheduleMonitor {
     private ScheduleMonitor() {}
 
     public static void main(String[] args) throws Exception {
-        if ("schedule".equals(System.getenv("GITHUB_EVENT_NAME"))) {
-            ZonedDateTime rigaTime = ZonedDateTime.now(ZoneId.of("Europe/Riga"));
-            int hour = rigaTime.getHour();
-            if (rigaTime.getMinute() < 50 || (hour != 5 && hour != 21)) {
-                System.out.println("Skipping UTC trigger outside 05:50/21:50 Europe/Riga.");
-                return;
-            }
-        }
-
         String groupCode = requiredEnv("TURIBA_GROUP_CODE");
         String topicUrl = requiredEnv("NTFY_TOPIC_URL");
         Path stateFile = Path.of(System.getenv().getOrDefault(

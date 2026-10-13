@@ -2,9 +2,10 @@ name: Check Turiba schedule
 
 on:
   schedule:
-    # Cover both Riga UTC+2 and UTC+3; the monitor filters to local 05:50/21:50.
-    - cron: "50 2,3 * * *"
-    - cron: "50 18,19 * * *"
+    # Roughly 05:50 and 21:50 Europe/Riga. GitHub often delays scheduled runs
+    # by hours, so every run performs the check (it only notifies on change).
+    - cron: "50 2 * * *"
+    - cron: "50 18 * * *"
   workflow_dispatch:
 
 permissions:
@@ -39,7 +40,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
           git add monitor/schedule.sha256
-          git diff --cached --quiet || git commit -m "Update schedule snapshot"
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Update schedule snapshot"
+          git pull --rebase origin main
           git push
