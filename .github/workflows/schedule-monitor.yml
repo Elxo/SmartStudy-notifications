@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: schedule-monitor
@@ -29,19 +29,24 @@ jobs:
           java-version: "21"
           cache: maven
 
+      # The snapshot lives in the Actions cache rather than being committed,
+      # so the timetable isn't published in this public repository.
+      - name: Restore previous schedule snapshot
+        uses: actions/cache/restore@v6
+        with:
+          path: monitor/schedule.tsv
+          key: schedule-snapshot-${{ github.run_id }}
+          restore-keys: schedule-snapshot-
+
       - name: Scrape and notify
         env:
           TURIBA_GROUP_CODE: ${{ secrets.TURIBA_GROUP_CODE }}
           NTFY_TOPIC_URL: ${{ secrets.NTFY_TOPIC_URL }}
-          SCHEDULE_STATE_FILE: monitor/schedule.sha256
+          SCHEDULE_STATE_FILE: monitor/schedule.tsv
         run: mvn -q -DskipTests compile exec:java -Dexec.mainClass=com.calendar.monitor.ScheduleMonitor
 
       - name: Save schedule snapshot
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add monitor/schedule.sha256
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Update schedule snapshot"
-          git pull --rebase origin main
-          git push
+        uses: actions/cache/save@v6
+        with:
+          path: monitor/schedule.tsv
+          key: schedule-snapshot-${{ github.run_id }}
